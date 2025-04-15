@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Q System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eee;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    button {
+      background-color: #6a1b9a;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #512d8c;
+    }
+    select {
+      padding: 5px 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    .ticket {
+      border: 2px dashed #6a1b9a;
+      color: #6a1b9a;
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+    .logo {
+      width: 80px;
+      margin: auto;
+      margin-bottom: 10px;
+    }
+    #queueList {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>نظام التذاكر - فرع WE</h2>
+
+  <label>اختر رقم الجهاز (النافذة):</label>
+  <select id="deviceNumber">
+    <option value="1">نافذة 1</option>
+    <option value="2">نافذة 2</option>
+    <option value="3">نافذة 3</option>
+    <option value="4">نافذة 4</option>
+  </select>
+
+  <div>
+    <button onclick="issueTicket()">إصدار تذكرة جديدة</button>
+    <button onclick="callNext()">استدعاء التالي</button>
+  </div>
+
+  <div id="currentTicket" class="ticket">
+    <img src="logo.png" class="logo" alt="WE Logo">
+    <h3>خدمة العملاء</h3>
+    <h1 id="ticketNum">0</h1>
+    <p>التاريخ: <span id="ticketDate"></span></p>
+    <p>العملاء في الانتظار: <span id="waitingCount">0</span></p>
+    <p style="font-size: 12px;">برجاء الانتظار سوف يتم خدمتك عاجلاً</p>
+  </div>
+
+  <div id="queueList"></div>
+</div>
+
+<footer style="text-align: center; margin-top: 40px; color: #6a1b9a; font-size: 14px;">
+  Powered by <strong>Mohand</strong>
+</footer>
+
+<script>
+  let queue = JSON.parse(localStorage.getItem('ticketQueue')) || [];
+  let lastNumber = parseInt(localStorage.getItem('ticketCounter')) || 0;
+  let currentDate = new Date().toLocaleDateString('ar-EG');
+  const channel = new BroadcastChannel('ticket_channel');
+
+  if (!localStorage.getItem('lastReset')) resetDailyCounter();
+
+  function checkDateChange() {
+    const today = new Date().toLocaleDateString('ar-EG');
+    if (today !== currentDate) {
+      currentDate = today;
+      resetDailyCounter();
+    }
+  }
+
+  function resetDailyCounter() {
+    lastNumber = 0;
+    queue = [];
+    localStorage.setItem('ticketCounter', lastNumber);
+    localStorage.setItem('ticketQueue', JSON.stringify(queue));
+    localStorage.setItem('lastReset', new Date().getTime());
+    updateQueueList();
+  }
+
+  function issueTicket() {
+    checkDateChange();
+    lastNumber++;
+    const ticketNumber = lastNumber;
+    localStorage.setItem('ticketCounter', lastNumber);
+
+    queue.push(ticketNumber);
+    localStorage.setItem('ticketQueue', JSON.stringify(queue));
+
+    document.getElementById('ticketNum').textContent = ticketNumber;
+    document.getElementById('ticketDate').textContent = currentDate;
+    document.getElementById('waitingCount').textContent = queue.length - 1;
+    document.getElementById('currentTicket').style.display = 'block';
+
+    updateQueueList();
+    syncData();
+    printOnlyTicket(ticketNumber, currentDate);
+  }
+
+  function callNext() {
+    const deviceNum = parseInt(document.getElementById('deviceNumber').value);
+    if (isNaN(deviceNum) || deviceNum <= 0) {
+      alert("الرجاء اختيار رقم الجهاز بشكل صحيح");
+      return;
+    }
+
+    if (queue.length > 0) {
+      const calledNumber = queue.shift();
+      localStorage.setItem('ticketQueue', JSON.stringify(queue));
+      updateQueueList();
+      document.getElementById('waitingCount').textContent = queue.length;
+      speakNumber(calledNumber, deviceNum);
+      syncData();
+    } else {
+      alert("لا يوجد عملاء في الانتظار");
+    }
+  }
+
+  function speakNumber(number, windowNum) {
+    const speech = new SpeechSynthesisUtterance();
+    speech.text = `الرقم ${number} إلى النافذة ${windowNum}`;
+    speech.lang = 'ar-SA';
+    window.speechSynthesis.speak(speech);
+  }
+
+  function updateQueueList() {
+    const queueList = document.getElementById('queueList');
+    queueList.innerHTML = queue.length > 0 ?
+      queue.map(num => `<div>رقم ${num} - ${currentDate}</div>`).join('') :
+      "<div>لا يوجد عملاء في الانتظار</div>";
+  }
+
+  function printOnlyTicket(ticketNumber, date) {
+    const myWindow = window.open('', '', 'width=250,height=600');
+    myWindow.document.write(`
+      <html dir="rtl">
+      <head>
+        <title>تذكرة</title>
+        <style>
+          @page {
+            size: 58mm auto;
+            margin: 0;
+          }
+          html, body {
+            width: 58mm;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            color: #000;
+          }
+          .ticket-box {
+            text-align: center;
+            padding: 10px;
+          }
+          img.logo {
+            width: 60px;
+            margin: 5px auto;
+            display: block;
+          }
+          h1 {
+            font-size: 28pt;
+            margin: 10px 0;
+          }
+          p {
+            margin: 5px 0;
+          }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        <div class="ticket-box">
+          <img src="logo.png" class="logo" alt="WE Logo">
+          <h3>خدمة العملاء</h3>
+          <h1>${ticketNumber}</h1>
+          <p>${date}</p>
+          <p style="font-size: 10pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
+        </div>
+      </body>
+      </html>
+    `);
+    myWindow.document.close();
+  }
+
+  function syncData() {
+    channel.postMessage({
+      type: 'update',
+      queue,
+      lastNumber
+    });
+  }
+
+  channel.onmessage = (event) => {
+    if (event.data.type === 'update') {
+      queue = event.data.queue;
+      lastNumber = event.data.lastNumber;
+      localStorage.setItem('ticketQueue', JSON.stringify(queue));
+      localStorage.setItem('ticketCounter', lastNumber);
+      updateQueueList();
+      document.getElementById('waitingCount').textContent = queue.length;
+    }
+  };
+
+  window.onload = function () {
+    updateQueueList();
+    document.getElementById('ticketDate').textContent = currentDate;
+  };
+</script>
+
+</body>
+</html>
