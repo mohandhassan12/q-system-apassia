@@ -164,18 +164,19 @@
   }
 
   function printOnlyTicket(ticketNumber, date) {
-  const myWindow = window.open('', '', 'width=300,height=600');
+  const myWindow = window.open('', '', 'width=400,height=900');
   myWindow.document.write(`
     <html dir="rtl">
     <head>
       <title>تذكرة</title>
       <style>
         @page {
-          size: 58mm auto;
+          size: 80mm 297mm;
           margin: 0;
         }
         html, body {
-          width: 58mm;
+          width: 80mm;
+          height: 297mm;
           margin: 0;
           padding: 0;
           font-family: Arial, sans-serif;
@@ -184,22 +185,26 @@
           display: flex;
           justify-content: center;
           align-items: center;
+          text-align: center;
         }
         .ticket-box {
-          text-align: center;
-          width: 100%;
-          padding: 10px 0;
+          padding: 10px;
         }
         img.logo {
           width: 200px;
           margin-bottom: 10px;
         }
         h1 {
-          font-size: 32pt;
+          font-size: 38pt;
           margin: 10px 0;
         }
-        p {
+        h3 {
+          font-size: 20pt;
           margin: 5px 0;
+        }
+        p {
+          margin: 4px 0;
+          font-size: 12pt;
         }
       </style>
     </head>
@@ -209,14 +214,15 @@
         <h3>خدمة العملاء</h3>
         <h1>${ticketNumber}</h1>
         <p>${date}</p>
-        <p style="font-size: 12pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
-        <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
+        <p>برجاء الانتظار، سيتم خدمتك قريباً</p>
+        <p>الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
       </div>
     </body>
     </html>
   `);
   myWindow.document.close();
 }
+
 
 
   function syncData() {
