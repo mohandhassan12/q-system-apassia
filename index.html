@@ -164,57 +164,60 @@
   }
 
   function printOnlyTicket(ticketNumber, date) {
-    const myWindow = window.open('', '', 'width=300,height=600');
-    myWindow.document.write(`
-      <html dir="rtl">
-      <head>
-        <title>تذكرة</title>
-        <style>
-          @page {
-            size: A4 portrait;
-            margin: 0;
-          }
-          html, body {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            font-size: 14pt;
-            color: #000;
-          }
-          .ticket-box {
-            text-align: center;
-          }
-          img.logo {
-            width: 120px;
-            margin-bottom: 10px;
-          }
-          h1 {
-            font-size: 32pt;
-            margin: 10px 0;
-          }
-          p {
-            margin: 5px 0;
-          }
-        </style>
-      </head>
-      <body onload="window.print(); window.close();">
-        <div class="ticket-box">
-          <img src="logo.png" class="logo" alt="WE Logo">
-          <h3>خدمة العملاء</h3>
-          <h1>${ticketNumber}</h1>
-          <p>${date}</p>
-          <p style="font-size: 12pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
-          <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
-        </div>
-      </body>
-      </html>
-    `);
-    myWindow.document.close();
-  }
+  const myWindow = window.open('', '', 'width=300,height=600');
+  myWindow.document.write(`
+    <html dir="rtl">
+    <head>
+      <title>تذكرة</title>
+      <style>
+        @page {
+          size: 58mm auto;
+          margin: 0;
+        }
+        html, body {
+          width: 58mm;
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+          font-size: 14pt;
+          color: #000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .ticket-box {
+          text-align: center;
+          width: 100%;
+          padding: 10px 0;
+        }
+        img.logo {
+          width: 120px;
+          margin-bottom: 10px;
+        }
+        h1 {
+          font-size: 32pt;
+          margin: 10px 0;
+        }
+        p {
+          margin: 5px 0;
+        }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="ticket-box">
+        <img src="logo.png" class="logo" alt="WE Logo">
+        <h3>خدمة العملاء</h3>
+        <h1>${ticketNumber}</h1>
+        <p>${date}</p>
+        <p style="font-size: 12pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
+        <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
+      </div>
+    </body>
+    </html>
+  `);
+  myWindow.document.close();
+}
+
 
   function syncData() {
     channel.postMessage({
