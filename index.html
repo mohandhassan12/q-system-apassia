@@ -78,7 +78,7 @@
     <p>التاريخ: <span id="ticketDate"></span></p>
     <p>العملاء في الانتظار: <span id="waitingCount">0</span></p>
     <p style="font-size: 12px;">برجاء الانتظار سوف يتم خدمتك عاجلاً</p>
-    <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت </p>
+    <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
   </div>
 
   <div id="queueList"></div>
@@ -94,22 +94,20 @@
   let currentDate = new Date().toLocaleDateString('ar-EG');
   const channel = new BroadcastChannel('ticket_channel');
 
-  if (!localStorage.getItem('lastReset')) resetDailyCounter();
-
   function checkDateChange() {
     const today = new Date().toLocaleDateString('ar-EG');
-    if (today !== currentDate) {
-      currentDate = today;
-      resetDailyCounter();
+    const lastResetDate = localStorage.getItem('lastResetDate');
+    if (today !== lastResetDate) {
+      resetDailyCounter(today);
     }
   }
 
-  function resetDailyCounter() {
+  function resetDailyCounter(todayDate) {
     lastNumber = 0;
     queue = [];
     localStorage.setItem('ticketCounter', lastNumber);
     localStorage.setItem('ticketQueue', JSON.stringify(queue));
-    localStorage.setItem('lastReset', new Date().getTime());
+    localStorage.setItem('lastResetDate', todayDate);
     updateQueueList();
   }
 
@@ -166,35 +164,36 @@
   }
 
   function printOnlyTicket(ticketNumber, date) {
-    const myWindow = window.open('', '', 'width=250,height=600');
+    const myWindow = window.open('', '', 'width=300,height=600');
     myWindow.document.write(`
       <html dir="rtl">
       <head>
         <title>تذكرة</title>
         <style>
           @page {
-            size: 58mm auto;
+            size: A4 portrait;
             margin: 0;
           }
           html, body {
-            width: 58mm;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            font-size: 12pt;
+            font-size: 14pt;
             color: #000;
           }
           .ticket-box {
             text-align: center;
-            padding: 10px;
           }
           img.logo {
-            width: 150px;
-            margin: 5px auto;
-            display: block;
+            width: 120px;
+            margin-bottom: 10px;
           }
           h1 {
-            font-size: 28pt;
+            font-size: 32pt;
             margin: 10px 0;
           }
           p {
@@ -208,8 +207,8 @@
           <h3>خدمة العملاء</h3>
           <h1>${ticketNumber}</h1>
           <p>${date}</p>
-          <p style="font-size: 10pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
-          <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت </p>
+          <p style="font-size: 12pt;">برجاء الانتظار، سيتم خدمتك قريباً</p>
+          <p style="font-size: 12px;">الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
         </div>
       </body>
       </html>
@@ -237,6 +236,7 @@
   };
 
   window.onload = function () {
+    checkDateChange();
     updateQueueList();
     document.getElementById('ticketDate').textContent = currentDate;
   };
