@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <title>Q System</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Varela Round, sans-serif;
       background-color: #eee;
       padding: 20px;
       text-align: center;
@@ -43,10 +44,20 @@
       margin-top: 20px;
       display: none;
     }
-    .logo {
+    .circle {
       width: 200px;
-      margin: auto;
-      margin-bottom: 10px;
+      height: 200px;
+      border-radius: 50%;
+      background-color: #5b2c91;
+      margin: 30px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .circle h2 {
+      font-size: 75px;
+      color: #FFFFFF;
+      margin: 0;
     }
     #queueList {
       margin-top: 20px;
@@ -72,7 +83,11 @@
   </div>
 
   <div id="currentTicket" class="ticket">
-    <img src="logo.png" class="logo" alt="WE Logo">
+     <div class="logo">
+      <div class="circle">
+       <h2>WE</h2>
+      </div>
+    </div>
     <h3>خدمة العملاء</h3>
     <h1 id="ticketNum">0</h1>
     <p>التاريخ: <span id="ticketDate"></span></p>
@@ -127,7 +142,7 @@
 
     updateQueueList();
     syncData();
-    printOnlyTicket(ticketNumber, currentDate);
+    printOnlyTicket(ticketNumber, currentDate, queue.length - 1);
   }
 
   function callNext() {
@@ -163,67 +178,97 @@
       "<div>لا يوجد عملاء في الانتظار</div>";
   }
 
-  function printOnlyTicket(ticketNumber, date) {
-  const myWindow = window.open('', '', 'width=400,height=900');
-  myWindow.document.write(`
-    <html dir="rtl">
-    <head>
-      <title>تذكرة</title>
-      <style>
-        @page {
-          size: 80mm 297mm;
-          margin: 0;
-        }
-        html, body {
-          width: 80mm;
-          height: 297mm;
-          margin: 0;
-          padding: 0;
-          font-family: Arial, sans-serif;
-          font-size: 14pt;
-          color: #000;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-        }
-        .ticket-box {
-          padding: 10px;
-        }
-        img.logo {
-          width: 200px;
-          margin-bottom: 10px;
-        }
-        h1 {
-          font-size: 38pt;
-          margin: 10px 0;
-        }
-        h3 {
-          font-size: 20pt;
-          margin: 5px 0;
-        }
-        p {
-          margin: 4px 0;
-          font-size: 12pt;
-        }
-      </style>
-    </head>
-    <body onload="window.print(); window.close();">
-      <div class="ticket-box">
-        <img src="logo.png" class="logo" alt="WE Logo">
-        <h3>خدمة العملاء</h3>
-        <h1>${ticketNumber}</h1>
-        <p>${date}</p>
-        <p>برجاء الانتظار، سيتم خدمتك قريباً</p>
-        <p>الفرع يقدم جميع خدمات الموبيل و الارضي و الانترنت</p>
-      </div>
-    </body>
-    </html>
-  `);
-  myWindow.document.close();
-}
-
-
+  function printOnlyTicket(ticketNumber, date, waitingCount) {
+    const myWindow = window.open('', '', 'width=400,height=900');
+    myWindow.document.write(`
+      <html dir="rtl">
+      <head>
+        <title>تذكرة</title>
+        <style>
+          @page {
+            size: 80mm 297mm;
+            margin: 0;
+          }
+          html, body {
+            width: 80mm;
+            height: 297mm;
+            margin: 0;
+            padding: 0;
+            font-family: Varela Round, sans-serif;
+            font-size: 14pt;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+          }
+          .ticket-box {
+            padding: 10px;
+            width: 100%;
+          }
+          .logo {
+            margin: 0 auto;
+            text-align: center;
+          }
+          .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #5b2c91;
+            margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .circle h2 {
+            font-size: 30px;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            font-weight: bold;
+          }
+          h1 {
+            font-size: 36pt;
+            margin: 10px 0;
+            color: #5b2c91;
+          }
+          h3 {
+            font-size: 18pt;
+            margin: 5px 0;
+            color: #333;
+          }
+          p {
+            margin: 8px 0;
+            font-size: 12pt;
+          }
+          .waiting-count {
+            font-weight: bold;
+            color: #d32f2f;
+          }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        <div class="ticket-box">
+          <div class="logo">
+            <div class="circle">
+              <h2>WE</h2>
+            </div>
+          </div>
+          <h3>خدمة العملاء</h3>
+          <h1>${ticketNumber}</h1>
+          <p>العملاء في الانتظار: <span class="waiting-count">${waitingCount}</span></p>
+          <p>${date}</p>
+          <p>برجاء الانتظار، سيتم خدمتك قريباً</p>
+          <p>الفرع يقدم جميع خدمات الموبيل و الارضي </p>
+           <br><p>و الانترنت</p>
+        </div>
+      </body>
+      </html>
+    `);
+    myWindow.document.close();
+  }
 
   function syncData() {
     channel.postMessage({
